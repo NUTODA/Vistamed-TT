@@ -7,7 +7,7 @@ from sqlalchemy.exc import OperationalError
 app = FastAPI(title="Diary API Test Task")
 app.include_router(diary_router, prefix="/v1")
 
-MAX_RETRIES = 30
+MAX_RETRIES = 20
 RETRY_DELAY = 2
 
 
@@ -18,7 +18,8 @@ async def on_startup():
     for attempt in range(MAX_RETRIES):
         try:
             await init_db()
-            print("Database initialized successfully.")
+            print("Database initialized successfully. Startup complete.")
+            return
 
         except OperationalError as e:
             # Ловим ошибку, если БД не готова
