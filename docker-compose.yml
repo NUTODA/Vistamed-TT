@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: diary_db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    # Сохранение данных на хосте, чтобы они не терялись при перезапуске
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    restart: always
+
+app:
+    image: myuser/diary-api:v1.0
+    container_name: diary_app
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    ports:
+      - "80:8000"
+    depends_on:
+      - db
+    command: /usr/local/bin/wait-for-it.sh db:5432 --timeout=30 -- uvicorn app.main:app --host 0.0.0.0 --port 8000
+
+volumes:
+  postgres_data:
